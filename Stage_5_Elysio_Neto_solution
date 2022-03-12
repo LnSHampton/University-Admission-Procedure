@@ -1,0 +1,17 @@
+"""
+This is Elysio Neto's Stage 5 solution. I was so impressed that I modeled my subsequent solutions after his philosophy, pack as much in as possible and use 
+Python's embedded functionality to do the heavy lifting.
+"""
+with open('applicant_list_5.txt', 'r', encoding='utf-8') as file:
+    preferences = []  # [['John Ritchie', 1, 89, 'Physics'], ['John Ritchie', 2, 75, 'Engineering'], ...]
+    approveds = {discipline: {} for discipline in ['Biotech', 'Chemistry', 'Engineering', 'Mathematics', 'Physics']}  # create a clean dictionary of disciplines
+    for applicant in file.read().split('\n'):
+        name, surname, physics, chemistry, math, computer_science = applicant.split()[:-3]  # 'fields' filled with each line words
+        for order, choice in enumerate(applicant.split()[-3:], start=1):  # department preferences = choices
+            preferences.append([name + ' ' + surname, order, choice, {discipline: int(grade) for discipline, grade in zip(approveds, [chemistry, chemistry, computer_science, math,  physics])}[choice]])
+approveds = {discipline: {} for discipline in approveds.keys()}  # create a clean dictionary of disciplines
+for name, order, choice, result  in sorted(preferences, key=lambda x: [x[1], -x[3], x[0]]):  # sort by: order, -grade, name+surname:
+    if len(approveds[choice]) < N and name not in '×'.join(['×'.join(list(approveds[department])) for department in approveds if list(approveds[department])]).replace('××', '').split('×'):  # if under N and the name didn't appear
+        approveds[choice][name] = result  # {'Physics': {John Ritchie, 89}, ...}
+for discipline in approveds:
+    print(discipline + '\n' + '\n'.join([f'{name} {result}' for name, result in sorted(approveds[discipline].items(), key=lambda x: [-x[1], x[0]])])) # sort by: -grade, name
