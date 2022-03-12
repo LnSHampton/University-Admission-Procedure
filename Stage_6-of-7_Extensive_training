@@ -1,0 +1,161 @@
+"""
+Created on Mon Dec 27 18:20:18 2021
+
+@author: LnSHa
+
+
+Project: University Admission Procedure
+
+Stage 6/7: Extensive training
+
+Description
+
+Some of the departments proposed an improvement to the algorithm. They need 
+more than one exam results for each applicant. For example, the Physics 
+Department needs both math and physics exams, while the Mathematics Department 
+is satisfied with the math exam only. Let's implement this request to make our 
+departments happy (the applicants on the other hand...)
+
+
+File Name: applicant_list_6.txt
+
+Objectives
+
+At this stage, your program should:
+
+1. Read an N integer from the input. This integer represents the maximum 
+   number of students for each department.
+2. Read the file named applicants.txt once again. The file has the same 
+   structure as in the previous stage.
+3. Consider the following exam results for departments: physics and math for 
+   the Physics department, chemistry for the Chemistry department, math for 
+   the Mathematics department, computer science and math for the Engineering 
+   Department, chemistry and physics for the Biotech department.
+4. As in the previous stage, the exams are listed in the following order for 
+   each applicant: physics, chemistry, math, computer science.
+5. For the departments that need several exams, calculate the mean score and 
+   use it to rank the applicants (use floating-point numbers with at least one 
+   decimal). Otherwise, use the result for a single exam.
+6. Keep the rest of the steps the same as in the previous stage (once again, 
+   there should be no more than N accepted applicants for each department; use 
+   the same principles for sorting).
+7. Instead of printing the results (you may do it if you want), output the 
+   admission lists to files. Create a file for each department, name it 
+   %department_name%.txt, for example, physics.txt. Write the names of the 
+   students accepted to the department and their mean finals score to the 
+   corresponding file (one student per line).
+
+
+Example
+
+The greater-than symbol followed by a space (> ) represents the user input. 
+Note that it's not part of the input.
+
+Example 1: 
+
+Below is an example of the input file
+
+The test score order is: physics, chemistry, math, computer science 
+
+Applicable test scores:
+Physics = physics + math (1 + 3)
+Chemistry = chemistry (2)
+Math = math (3)
+Engineering = math + computer science (3 + 4)
+Biotech = physics and chemistry (1 + 2)
+    
+Natha Keefe 71 67 53 60 Engineering Biotech Chemistry
+Crescentia Dow 86 94 85 51 Chemistry Physics Mathematics
+Randon Bradhust 72 88 85 83 Biotech Engineering Chemistry
+Dashawn Bosley 80 79 82 61 Mathematics Chemistry Biotech
+Nicolasa Sumpter 75 82 96 81 Engineering Mathematics Biotech
+Cressie Gillespie 85 92 82 70 Physics Mathematics Engineering
+Tawny Crockett 71 90 80 72 Chemistry Biotech Physics
+Kennon Inverarity 71 84 98 71 Mathematics Engineering Chemistry
+Halima Brydone 77 85 82 86 Chemistry Physics Mathematics
+Esther Bratby 55 76 88 62 Mathematics Chemistry Biotech
+Lorry Bunger 75 73 84 97 Engineering Biotech Physics
+Fatemah Desavigny 81 71 73 86 Physics Mathematics Engineering
+Marti Mclaws 71 71 61 60 Engineering Chemistry Biotech
+Estephanie Phelps 80 95 45 71 Chemistry Physics Mathematics
+Tommi Peerless 72 81 81 92 Engineering Physics Mathematics
+Cynthia Hermitton 70 59 62 88 Engineering Biotech Chemistry
+Cheyla Hankinson 75 80 86 88 Engineering Mathematics Biotech
+Giovanna Keel 84 71 76 80 Physics Mathematics Engineering
+Narissa Worthington 52 71 80 73 Biotech Chemistry Mathematics
+Aundria Guthrie 61 81 94 71 Mathematics Chemistry Engineering
+Teneil Maclean 85 63 84 45 Mathematics Physics Chemistry
+Shealynn Melville 74 76 88 62 Mathematics Chemistry Physics
+Darrah Smyth 75 73 84 97 Physics Biotech Engineering
+
+An example of the output:
+
+> 7
+
+The examples of the output to different files:
+
+biotech.txt:
+
+Randon Bradhust 80.0
+Narissa Worthington 61.5
+
+chemistry.txt:
+
+Estephanie Phelps 95.0
+Crescentia Dow 94.0
+Tawny Crockett 90.0
+Halima Brydone 85.0
+
+engineering.txt:
+
+Lorry Bunger 90.5
+Nicolasa Sumpter 88.5
+Cheyla Hankinson 87.0
+Tommi Peerless 86.5
+Cynthia Hermitton 75.0
+Marti Mclaws 60.5
+Natha Keefe 56.5
+
+mathematics.txt:
+
+Kennon Inverarity 98.0
+Aundria Guthrie 94.0
+Esther Bratby 88.0
+Shealynn Melville 88.0
+Teneil Maclean 84.0
+Dashawn Bosley 82.0
+
+physics.txt:
+
+Cressie Gillespie 83.5
+Giovanna Keel 80.0
+Darrah Smyth 79.5
+Fatemah Desavigny 77.0
+
+"""
+# Posted solution
+def calc(d, s):  # scores: physics: 0, chem: 1, math: 2, cs: 3
+    return float(s[1]) if d == 'Chemistry' else \
+           float(s[2]) if d == 'Mathematics' else \
+           float((s[0] + s[2]) / 2) if d == 'Physics' else \
+           float((s[2] + s[3]) / 2) if d == 'Engineering' else \
+           float((s[0] + s[1]) / 2) if d == 'Biotech' else 0
+
+
+N, a_list, x_list, c_list = int(input()), [], {}, {}  # seats, applicant list, processed list and class list
+with open('applicants.txt', 'r', encoding='utf-8') as file:
+    for line in file.read().split('\n'):
+        # print(line)
+        scr, d = ['','','',''], ['','','']  # captures the scores and departments
+        fn, ln, scr[0], scr[1], scr[2], scr[3], d[0], d[1], d[2] = line.strip().split()
+        for seq, dept in enumerate(d):  # iterate through the applicant's departments
+            a_list.append([seq, dept, calc(dept, list(map(int,scr))), f'{fn} {ln}'])
+for r, d2, s2, p in sorted(a_list, key=lambda x: (x[0], x[1], -x[2], x[3])):  # sort by rank, dept, score and name
+    if p not in x_list and N > len(c_list.setdefault(d2, {})):  # if they are not in the processed list and seats are available
+        c_list[d2][p], x_list[p] = s2, d2  # add to the class list and the processed list
+for dept, students in sorted(c_list.items(), key=lambda k: (k[0], k[1])):
+    # print(f'\nDept: {dept}')
+    # print('\n'.join([student + ' ' + str(score) for student, score in sorted(students.items(), key=lambda k: (-k[1], k[0]))]))
+    with open(dept.lower() + '.txt', 'w', encoding='utf-8') as file:
+        [file.writelines(f'{student} {score}\n' for student, score in sorted(students.items(), key=lambda k: (-k[1], k[0])))]
+ 
